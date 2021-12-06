@@ -1,0 +1,19 @@
+FROM instructure/rvm
+
+USER root
+RUN apt-get update && apt-get install -y git postgresql-client
+USER docker
+
+RUN bash -lc "rvm use --default 2.6"
+RUN bash -lc "rvm 2.6,2.7,3.0 do gem install bundler -v 2.2.27"
+
+COPY --chown=docker:docker sentry-inst_jobs.gemspec Gemfile ./
+COPY --chown=docker:docker lib/sentry/inst_jobs/version.rb lib/sentry/inst_jobs/version.rb
+
+RUN bash -lc "rvm 2.6,2.7,3.0 do bundle install --jobs 6"
+
+COPY --chown=docker:docker . /usr/src/app
+
+ENV TEST_DB_USERNAME postgres
+
+CMD bash -lc "until pg_isready --host=$TEST_DB_HOST; do sleep 1; done && bundle exec rake"

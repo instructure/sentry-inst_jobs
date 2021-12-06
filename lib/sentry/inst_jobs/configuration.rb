@@ -1,13 +1,13 @@
 module Sentry
   class Configuration
-    attr_reader :delayed_job
+    attr_reader :inst_jobs
 
     add_post_initialization_callback do
-      @delayed_job = Sentry::DelayedJob::Configuration.new
+      @inst_jobs = Sentry::InstJobs::Configuration.new
     end
   end
 
-  module DelayedJob
+  module InstJobs
     class Configuration
       # Set this option to true if you want Sentry to only capture the last job
       # retry if it fails.

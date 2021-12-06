@@ -1,12 +1,11 @@
 # frozen_string_literal: true
-require "delayed_job"
+require "inst-jobs"
 
 module Sentry
-  module DelayedJob
+  module InstJobs
     class Plugin < ::Delayed::Plugin
       # need to symbolize strings as keyword arguments in Ruby 2.4~2.6
-      DELAYED_JOB_CONTEXT_KEY = :"Delayed-Job"
-      ACTIVE_JOB_CONTEXT_KEY = :"Active-Job"
+      INST_JOBS_CONTEXT_KEY = :"Inst-Jobs"
 
       callbacks do |lifecycle|
         lifecycle.around(:invoke_job) do |job, *args, &block|
@@ -14,11 +13,11 @@ module Sentry
 
           Sentry.with_scope do |scope|
             contexts = generate_contexts(job)
-            scope.set_transaction_name(contexts.dig(ACTIVE_JOB_CONTEXT_KEY, :job_class) || contexts.dig(DELAYED_JOB_CONTEXT_KEY, :job_class))
+            scope.set_transaction_name(contexts.dig(INST_JOBS_CONTEXT_KEY, :job_class))
             scope.set_contexts(**contexts)
-            scope.set_tags("delayed_job.queue" => job.queue, "delayed_job.id" => job.id.to_s)
+            scope.set_tags("inst_jobs.queue" => job.queue, "inst_jobs.id" => job.id.to_s)
 
-            transaction = Sentry.start_transaction(name: scope.transaction_name, op: "delayed_job")
+            transaction = Sentry.start_transaction(name: scope.transaction_name, op: "inst_jobs")
             scope.set_span(transaction) if transaction
 
             begin
@@ -37,7 +36,7 @@ module Sentry
       def self.generate_contexts(job)
         context = {}
 
-        context[DELAYED_JOB_CONTEXT_KEY] = {
+        context[INST_JOBS_CONTEXT_KEY] = {
           id: job.id.to_s,
           priority: job.priority,
           attempts: job.attempts,
@@ -51,36 +50,28 @@ module Sentry
           job_class: compute_job_class(job.payload_object),
         }
 
-        if job.payload_object.respond_to?(:job_data)
-          context[ACTIVE_JOB_CONTEXT_KEY] = {}
-
-          job.payload_object.job_data.each do |key, value|
-            context[ACTIVE_JOB_CONTEXT_KEY][key.to_sym] = value
-          end
-        end
-
         context
       end
 
       def self.compute_job_class(payload_object)
         if payload_object.is_a? Delayed::PerformableMethod
           klass = payload_object.object.is_a?(Class) ? payload_object.object.name : payload_object.object.class.name
-          "#{klass}##{payload_object.method_name}"
+          "#{klass}##{payload_object.method}"
         else
           payload_object.class.name
         end
       end
 
       def self.capture_exception(exception, job)
-        Sentry::DelayedJob.capture_exception(exception, hint: { background: false }) if report?(job)
+        Sentry::InstJobs.capture_exception(exception, hint: { background: false }) if report?(job)
       end
 
       def self.report?(job)
-        return true unless Sentry.configuration.delayed_job.report_after_job_retries
+        return true unless Sentry.configuration.inst_jobs.report_after_job_retries
 
         # We use the predecessor because the job's attempts haven't been increased to the new
         # count at this point.
-        job.attempts >= Delayed::Worker.max_attempts.pred
+        job.attempts >= job.max_attempts.pred
       end
 
       def self.finish_transaction(transaction, status)
@@ -93,4 +84,4 @@ module Sentry
   end
 end
 
-Delayed::Worker.plugins << Sentry::DelayedJob::Plugin
+Delayed::Worker.plugins << Sentry::InstJobs::Plugin

@@ -1,3 +1,3 @@
 build:
 	bundle install
-	gem build sentry-delayed_job.gemspec
+	gem build sentry-inst_jobs.gemspec

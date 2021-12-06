@@ -2,25 +2,10 @@ require "bundler/setup"
 require "pry"
 
 require "active_record"
-require "delayed_job"
-require "delayed_job_active_record"
+require "inst-jobs"
 
 require "sentry-ruby"
-
-require 'simplecov'
-
-SimpleCov.start do
-  project_name "sentry-delayed_job"
-  root File.join(__FILE__, "../../../")
-  coverage_dir File.join(__FILE__, "../../coverage")
-end
-
-if ENV["CI"]
-  require 'simplecov-cobertura'
-  SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
-end
-
-require "sentry-delayed_job"
+require "sentry-inst_jobs"
 
 DUMMY_DSN = 'http://12345:67890@sentry.localdomain/sentry/42'
 
@@ -46,7 +31,18 @@ RSpec.configure do |config|
 end
 
 # This connection will do for database-independent bug reports.
-ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
+ENV["TEST_DB_HOST"] ||= "localhost"
+ENV["TEST_DB_DATABASE"] ||= "sentry-inst-jobs-test"
+
+connection_config = {
+  adapter: :postgresql,
+  host: ENV["TEST_DB_HOST"].presence,
+  encoding: "utf8",
+  username: ENV["TEST_DB_USERNAME"],
+  database: ENV["TEST_DB_DATABASE"]
+}
+
+ActiveRecord::Base.establish_connection(connection_config.merge(database: "postgres"))
 # ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 ActiveRecord::Schema.define do
@@ -61,6 +57,14 @@ ActiveRecord::Schema.define do
     table.string :locked_by                          # Who is working on this object (if locked)
     table.string :queue                              # The name of the queue this job is in
     table.timestamps null: true
+
+    # inst-jobs specific columns
+    table.string :tag
+    table.string :strand
+    table.integer :max_attempts
+    table.datetime :expires_at
+    table.string :singleton
+    table.boolean :next_in_strand, default: true, null: false
   end
 end
 

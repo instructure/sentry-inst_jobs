@@ -1,9 +1,8 @@
 require "pry"
 require "active_job"
 require "active_record"
-require "delayed_job"
-require "delayed_job_active_record"
-require "sentry-delayed_job"
+require "inst-jobs"
+require "sentry-inst_jobs"
 # require "logger"
 
 # This connection will do for database-independent bug reports.
@@ -22,32 +21,24 @@ ActiveRecord::Schema.define do
     table.string :locked_by                          # Who is working on this object (if locked)
     table.string :queue                              # The name of the queue this job is in
     table.timestamps null: true
+
+    # inst-jobs specific columns
+    table.string :tag
+    table.string :strand
+    table.integer :max_attempts
+    table.datetime :expires_at
+    table.string :singleton
+    table.boolean :next_in_strand, default: true, null: false
   end
 end
 
 Sentry.init do |config|
   config.breadcrumbs_logger = [:sentry_logger]
   # replace it with your sentry dsn
-  config.dsn = 'https://2fb45f003d054a7ea47feb45898f7649@o447951.ingest.sentry.io/5434472'
+  config.dsn = 'http://ae0ee6fcea6d4005aba998c8b1cd6eb1@sentry.docker/3'
 end
 
-class MyJob < ActiveJob::Base
-  self.queue_adapter = :delayed_job
-
-  def perform
-    raise "foo"
-  end
-end
-
-MyJob.perform_later
-
-enqueued_job = Delayed::Backend::ActiveRecord::Job.last
-
-begin
-  enqueued_job.invoke_job
-rescue => e
-  puts("active job failed because of \"#{e.message}\"")
-end
+Delayed::Worker.new
 
 class Foo
   def bar
@@ -64,5 +55,3 @@ begin
 rescue => e
   puts("inline job failed because of \"#{e.message}\"")
 end
-
-

@@ -1,10 +1,10 @@
 require "spec_helper"
 
-RSpec.describe Sentry::DelayedJob::Configuration do
-  it "adds #delayed_job option to Sentry::Configuration" do
+RSpec.describe Sentry::InstJobs::Configuration do
+  it "adds #inst_jobs option to Sentry::Configuration" do
     config = Sentry::Configuration.new
 
-    expect(config.delayed_job).to be_a(described_class)
+    expect(config.inst_jobs).to be_a(described_class)
   end
 
   describe "#report_after_job_retries" do

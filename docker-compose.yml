@@ -1,0 +1,16 @@
+version: "2.1"
+
+services:
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.ci
+    environment:
+      TEST_DB_HOST: postgres
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:9.6
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
