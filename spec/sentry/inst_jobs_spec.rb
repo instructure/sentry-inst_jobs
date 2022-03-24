@@ -40,7 +40,7 @@ RSpec.describe Sentry::InstJobs do
   end
 
   it "sets correct extra/tags context for each job" do
-    Post.new.delay.report
+    Post.new.delay(strand: 'strand1', singleton: "singleton_value").report
     enqueued_job = Delayed::Backend::ActiveRecord::Job.last
     enqueued_job.invoke_job
 
@@ -48,6 +48,9 @@ RSpec.describe Sentry::InstJobs do
     event = transport.events.last.to_hash
     expect(event[:message]).to eq("report")
     expect(event[:contexts][:"Inst-Jobs"][:id]).to eq(enqueued_job.id.to_s)
+    expect(event[:contexts][:"Inst-Jobs"][:strand]).to eq("strand1")
+    expect(event[:contexts][:"Inst-Jobs"][:singleton]).to eq("singleton_value")
+    expect(event[:contexts][:"Inst-Jobs"][:tag]).to eq("Post#report")
     expect(event[:tags]).to eq({ "inst_jobs.id" => enqueued_job.id.to_s, "inst_jobs.queue" => "queue" })
   end
 

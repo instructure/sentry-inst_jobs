@@ -16,4 +16,4 @@ COPY --chown=docker:docker . /usr/src/app
 
 ENV TEST_DB_USERNAME postgres
 
-CMD bash -lc "until pg_isready --host=$TEST_DB_HOST; do sleep 1; done && bundle exec rake"
+CMD ["bash", "-lc", "./test.sh"]

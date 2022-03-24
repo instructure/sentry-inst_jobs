@@ -1,0 +1,7 @@
+test:
+  adapter: postgresql
+  database: <%= ENV['TEST_DB_DATABASE'] %>
+  pool: 1
+  timeout: 5000
+  username: <%= ENV.fetch('TEST_DB_USERNAME', '') %>
+  host: <%= ENV.fetch('TEST_DB_HOST', '') %>

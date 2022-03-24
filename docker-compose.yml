@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile.ci
     environment:
+      RAILS_ENV: test
       TEST_DB_HOST: postgres
     depends_on:
       - postgres

@@ -48,6 +48,9 @@ module Sentry
           last_error: job.last_error&.byteslice(0..1000),
           handler: job.handler&.byteslice(0..1000),
           job_class: compute_job_class(job.payload_object),
+          tag: job.tag,
+          strand: job.strand,
+          singleton: job.singleton,
         }
 
         context
@@ -76,7 +79,7 @@ module Sentry
 
       def self.finish_transaction(transaction, status)
         return unless transaction
-  
+
         transaction.set_http_status(status)
         transaction.finish
       end
