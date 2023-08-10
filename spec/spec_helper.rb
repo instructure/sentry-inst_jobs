@@ -1,5 +1,4 @@
 require "bundler/setup"
-require "pry"
 
 require "active_record"
 require "inst-jobs"

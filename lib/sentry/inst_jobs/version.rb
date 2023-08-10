@@ -1,5 +1,5 @@
 module Sentry
   module InstJobs
-    VERSION = "1.0.2"
+    VERSION = "5.10.0"
   end
 end

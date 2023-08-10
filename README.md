@@ -15,7 +15,6 @@ make `sentry-delayed_job` compatible with `inst-jobs`. This integration is not a
 ### Install
 
 ```ruby
-gem "sentry-ruby"
 gem "sentry-inst_jobs"
 ```
 

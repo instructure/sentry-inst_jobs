@@ -6,6 +6,7 @@ module Sentry
     class Plugin < ::Delayed::Plugin
       # need to symbolize strings as keyword arguments in Ruby 2.4~2.6
       INST_JOBS_CONTEXT_KEY = :"Inst-Jobs"
+      OP_NAME = "inst_jobs"
 
       callbacks do |lifecycle|
         lifecycle.around(:invoke_job) do |job, *args, &block|
@@ -13,11 +14,11 @@ module Sentry
 
           Sentry.with_scope do |scope|
             contexts = generate_contexts(job)
-            scope.set_transaction_name(contexts.dig(INST_JOBS_CONTEXT_KEY, :job_class))
+            scope.set_transaction_name(contexts.dig(INST_JOBS_CONTEXT_KEY, :job_class), source: :task)
             scope.set_contexts(**contexts)
             scope.set_tags("inst_jobs.queue" => job.queue, "inst_jobs.id" => job.id.to_s)
 
-            transaction = Sentry.start_transaction(name: scope.transaction_name, op: "inst_jobs")
+            transaction = Sentry.start_transaction(name: scope.transaction_name, source: scope.transaction_source, op: OP_NAME)
             scope.set_span(transaction) if transaction
 
             begin
