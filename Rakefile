@@ -1,4 +1,5 @@
 require "bundler/gem_tasks"
+require "logger"
 require "rspec/core/rake_task"
 
 APP_RAKEFILE = File.expand_path("../spec/dummy/Rakefile", __FILE__)
