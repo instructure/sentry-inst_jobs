@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.homepage = "https://github.com/instructure/sentry-inst_jobs"
 
   spec.platform = Gem::Platform::RUBY
-  spec.required_ruby_version = '>= 2.4'
+  spec.required_ruby_version = '>= 3.1.0'
   spec.extra_rdoc_files = %w[README.md LICENSE]
   spec.files = `git ls-files | grep -Ev '^(spec|benchmarks|examples)'`.split("\n")
 
