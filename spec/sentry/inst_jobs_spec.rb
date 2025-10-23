@@ -45,7 +45,7 @@ RSpec.describe Sentry::InstJobs do
     enqueued_job.invoke_job
 
     expect(transport.events.count).to eq(1)
-    event = transport.events.last.to_hash
+    event = transport.events.last.to_h
     expect(event[:message]).to eq("report")
     expect(event[:contexts][:"Inst-Jobs"][:id]).to eq(enqueued_job.id.to_s)
     expect(event[:contexts][:"Inst-Jobs"][:strand]).to eq("strand1")
@@ -70,7 +70,7 @@ RSpec.describe Sentry::InstJobs do
     enqueued_job.invoke_job
 
     expect(transport.events.count).to eq(1)
-    event = transport.events.last.to_hash
+    event = transport.events.last.to_h
     expect(event[:message]).to eq("tagged report")
     expect(event[:tags]).to eq({ "inst_jobs.id" => enqueued_job.id.to_s, "inst_jobs.queue" => "queue", number: 1 })
 
@@ -79,7 +79,7 @@ RSpec.describe Sentry::InstJobs do
     enqueued_job.invoke_job
 
     expect(transport.events.count).to eq(2)
-    event = transport.events.last.to_hash
+    event = transport.events.last.to_h
     expect(event[:tags]).to eq({ "inst_jobs.id" => enqueued_job.id.to_s, "inst_jobs.queue" => "queue" })
   end
 
@@ -95,7 +95,7 @@ RSpec.describe Sentry::InstJobs do
       end.to raise_error(ZeroDivisionError)
 
       expect(transport.events.count).to eq(1)
-      event = transport.events.last.to_hash
+      event = transport.events.last.to_h
 
       expect(event[:sdk]).to eq({ name: "sentry.ruby.inst_jobs", version: described_class::VERSION })
       expect(event.dig(:exception, :values, 0, :type)).to eq("ZeroDivisionError")
@@ -111,7 +111,7 @@ RSpec.describe Sentry::InstJobs do
       end.to raise_error(RuntimeError)
 
       expect(transport.events.count).to eq(1)
-      event = transport.events.last.to_hash
+      event = transport.events.last.to_h
 
       expect(event[:tags]).to eq({ "inst_jobs.id" => enqueued_job.id.to_s, "inst_jobs.queue" => "queue", number: 1 })
       expect(Sentry.get_current_scope.extra).to eq({})
@@ -125,7 +125,7 @@ RSpec.describe Sentry::InstJobs do
       end.to raise_error(ZeroDivisionError)
 
       expect(transport.events.count).to eq(2)
-      event = transport.events.last.to_hash
+      event = transport.events.last.to_h
       expect(event[:tags]).to eq({ "inst_jobs.id" => enqueued_job.id.to_s, "inst_jobs.queue" => "queue" })
       expect(Sentry.get_current_scope.extra).to eq({})
       expect(Sentry.get_current_scope.tags).to eq({})

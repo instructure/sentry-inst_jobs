@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    sentry-inst_jobs (5.10.0)
+    sentry-inst_jobs (6.0.0)
       inst-jobs (~> 3.0)
-      sentry-ruby (~> 5.10)
+      sentry-ruby (~> 6.0)
 
 GEM
   remote: https://rubygems.org/
@@ -87,7 +87,7 @@ GEM
     loofah (2.24.1)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
-    minitest (5.15.0)
+    minitest (5.26.0)
     nokogiri (1.18.8-aarch64-linux-gnu)
       racc (~> 1.4)
     nokogiri (1.18.8-arm64-darwin)
@@ -148,10 +148,11 @@ GEM
       rspec-support (~> 3.11.0)
     rspec-support (3.11.0)
     securerandom (0.4.1)
-    sentry-rails (5.10.0)
-      railties (>= 5.0)
-      sentry-ruby (~> 5.10.0)
-    sentry-ruby (5.10.0)
+    sentry-rails (6.0.0)
+      railties (>= 5.2.0)
+      sentry-ruby (~> 6.0.0)
+    sentry-ruby (6.0.0)
+      bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
     stringio (3.1.7)
     thor (1.4.0)
@@ -173,7 +174,7 @@ DEPENDENCIES
   rake (~> 12.0)
   rspec (~> 3.0)
   sentry-inst_jobs!
-  sentry-rails (~> 5.10)
+  sentry-rails (~> 6.0)
 
 BUNDLED WITH
    2.6.9
